@@ -2949,6 +2949,7 @@
                     }
 
                     if (!collision) {
+                        console.log(this.currentSpeed);
                         this.distanceRan += this.currentSpeed * deltaTime / this.msPerFrame;
 
                         if (this.currentSpeed < this.config.MAX_SPEED) {

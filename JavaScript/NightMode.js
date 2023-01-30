@@ -142,8 +142,13 @@ NightMode.prototype = {
         } else if (NightMode.invertTimer) {
             NightMode.invertTimer += deltaTime;
         } else {
-            //每500帧触发黑夜，这里只是为了模拟效果，完整游戏中是每700米触发一次黑夜
-            NightMode.invertTrigger = !(Runner.instance_.gameFrame % 500);
+            //每700米触发一次黑夜
+            let distance = Runner.instance_.distance * 0.025;
+            if (distance !== 0) {
+                if (distance > 700 && distance % 700 <= 1) {
+                    NightMode.invertTrigger = true;
+                }
+            }
             if (NightMode.invertTrigger && NightMode.invertTimer === 0) {
                 NightMode.invertTimer += deltaTime;
                 NightMode.inverted = document.body.classList.toggle('inverted', NightMode.invertTrigger);

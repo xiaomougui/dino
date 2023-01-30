@@ -7,7 +7,6 @@
 function DistanceMeter(canvas, spritePos, canvasWidth) {
     this.canvas = canvas;
     this.canvasCtx = canvas.getContext('2d');
-    this.image = imgSprite;
     this.spritePos = spritePos;
 
     //相对坐标
@@ -90,7 +89,7 @@ DistanceMeter.prototype = {
         let sourceX = DistanceMeter.dimensions.WIDTH * value;
         let sourceY = 0;
 
-        let targetX = digitXPos * DistanceMeter.dimensions.DEST_WIDTH;
+        let targetX = digitXpos * DistanceMeter.dimensions.DEST_WIDTH;
         let targetY = this.y;
         let targetWidth = DistanceMeter.dimensions.WIDTH;
         let targetHeight = DistanceMeter.dimensions.HEIGHT;
@@ -123,6 +122,7 @@ DistanceMeter.prototype = {
     },
 
     update: function (deltaTime, distance) {
+        console.log(distance);
         let paint = true;
         let playSound = false;
 
@@ -195,9 +195,9 @@ DistanceMeter.prototype = {
      * @param {Number} distance 
      */
     setHighScore: function (distance) {
-        let distance = this.getActualDistance(distance);
-        if (distance > this.highScore) {
-            let highScoreStr = (this.defaultString + distance).substr(- this.maxScoreUnits);
+        let actuDistance = this.getActualDistance(distance);
+        if (actuDistance > this.highScore) {
+            let highScoreStr = (this.defaultString + actuDistance).substr(- this.maxScoreUnits);
             //10和11分别对应雪碧图中的H、I
             this.highScore = ['10', '11', ''].concat(highScoreStr.split(''));
         }

@@ -11,6 +11,8 @@ function Runner(outerContainerId, opt_config) {
         Runner.instance_ = this;
     }
 
+    this.config = Runner.config;
+
     this.dimensions = Runner.defaultDimensions;
 
     this.outerContainerEl = document.getElementById(outerContainerId);
@@ -23,7 +25,13 @@ function Runner(outerContainerId, opt_config) {
     this.paused = false;
     this.crashed = false;
 
-    this.raqId = 0;
+    this.raqId = 0; //逐帧动画方法的id
+
+    this.currentSpeed = 0;  //当前速度
+
+    this.distance = 0;  //当前走过的距离
+
+    this.msPerFrame = 1000 / FPS;
 
     this.gameFrame = 0;
     this.init();
@@ -58,16 +66,31 @@ Runner.keycodes = {
     RESTART: { '13': 1 }  // Enter，重新开始
 }
 
+Runner.config = {
+    ACCELERATION: 0.001,    //加速
+    AUDIOCUE_PROXIMITY_THRESHOLD: 190,
+    AUDIOCUE_PROXIMITY_THRESHOLD_MOBILE_A11Y: 250,
+    GAP_COEFFICIENT: 0.6,   //缺口系数
+    INVERT_DISTANCE: 700,   //倒置距离
+    MAX_SPEED: 13,  //最大速度
+    MOBILE_SPEED_COEFFICIENT: 1.2,  //手机(安卓)系数
+    SPEED: 6    //速度
+}
+
 Runner.prototype = {
     init: function () {
         this.createCanvas();
         this.loadImages();
+
+        //初始化为默认速度
+        this.currentSpeed = this.config.SPEED;
 
         this.horizon = new HorizonLine(this.canvasEl, Runner.spriteDefinition.HORIZON);
         this.cloud = new Cloud(this.canvasEl, Runner.spriteDefinition.CLOUD, DEFAULT_WIDTH);
         this.night = new NightMode(this.canvasEl, Runner.spriteDefinition.MOON, DEFAULT_WIDTH);
         this.obstacle = new Obstacle(this.canvasEl, Obstacle.types[0], Runner.spriteDefinition[Obstacle.types[0].type], { WIDTH: 600 }, 0.6, 1);
         this.trex = new Trex(this.canvasEl, Runner.spriteDefinition.TREX);
+        this.score = new DistanceMeter(this.canvasEl, Runner.spriteDefinition.TEXT_SPRITE, DEFAULT_WIDTH);
 
         this.activated = true;
         this.paused = false;
@@ -143,14 +166,38 @@ Runner.prototype = {
     },
 
     /**
+     * 计算距离
+     */
+    colcDistance: function (deltaTime) {
+        this.distance += this.currentSpeed * deltaTime / this.msPerFrame;
+
+    },
+
+    /**
+     * 设置速度
+     */
+    setSpeed: function () {
+        if (this.currentSpeed < this.config.MAX_SPEED) {
+            this.currentSpeed += this.config.ACCELERATION;
+        }
+    },
+
+    /**
      * 更新页面
      */
     update: function (time) {
         if (!this.crashed) {
             this.startTime = this.startTime || 0;
             let deltaTime = 0;
-            let speed = 4;
             let ctx = this.canvasCtx;
+
+            time = time || 0;
+            deltaTime = time - this.startTime;
+
+            this.colcDistance(deltaTime);
+            this.setSpeed();
+
+            console.log(this.currentSpeed);
 
             //游戏从开始到当前经历的帧的数量++
             this.gameFrame++;
@@ -158,15 +205,20 @@ Runner.prototype = {
             //清除画面
             ctx.clearRect(0, 0, 600, 150);
 
-            time = time || 0;
-            deltaTime = time - this.startTime;
+
 
             //执行
             this.trex.update(deltaTime, this.trex.status);
-            this.horizon.update(deltaTime, speed);
+            this.score.update(deltaTime, this.distance);
+            this.horizon.update(deltaTime, this.currentSpeed);
             this.cloud.updateClouds(0.2);
             this.night.invert(deltaTime);
-            this.obstacle.updateObstacles(deltaTime, speed);
+
+            //延迟出现障碍物
+            if (this.gameFrame > FPS) {
+                this.obstacle.updateObstacles(deltaTime, this.currentSpeed);
+            }
+
 
             //检测碰撞
             this.isCrashed(Obstacle.obstacles[0], this.trex);
