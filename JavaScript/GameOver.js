@@ -20,6 +20,7 @@ function GameOverPanel(canvas, textImgPos, restartImgPos, dimensions) {
     this.canvasDimensions = dimensions;
     this.textImgPos = textImgPos;
     this.restartImgPos = restartImgPos;
+    this.controlIndex = 0;
     this.draw();
 }
 
@@ -52,7 +53,12 @@ GameOverPanel.prototype = {
         this.canvasCtx.drawImage(Runner.instance_.imgSprite, textSourceX, textSourceY, textSourceWidth, textSourceHeight, textTargetX, textTargetY, textTargetWidth, textTargetHeight);
 
         // Restart button.
-        this.canvasCtx.drawImage(Runner.instance_.imgSprite, this.restartImgPos.x, this.restartImgPos.y, restartSourceWidth, restartSourceHeight, restartTargetX, restartTargetY, dimensions.RESTART_WIDTH, dimensions.RESTART_HEIGHT);
+        this.canvasCtx.drawImage(Runner.instance_.imgSprite, this.restartImgPos.x + restartSourceWidth, this.restartImgPos.y, restartSourceWidth, restartSourceHeight, restartTargetX, restartTargetY, dimensions.RESTART_WIDTH, dimensions.RESTART_HEIGHT);
+        for (let i = 0; i < 8; i++) {
+            setTimeout(() => {
+                this.canvasCtx.drawImage(Runner.instance_.imgSprite, this.restartImgPos.x + restartSourceWidth * i, this.restartImgPos.y, restartSourceWidth, restartSourceHeight, restartTargetX, restartTargetY, dimensions.RESTART_WIDTH, dimensions.RESTART_HEIGHT);
+            }, 300);
+        }
     }
 };
 

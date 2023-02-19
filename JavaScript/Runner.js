@@ -125,17 +125,20 @@ Runner.prototype = {
      * 开始监听事件
      */
     startListener: function () {
-        document.addEventListener('keydown', this.onKeyDown);
-        document.addEventListener('keyup', this.onKeyUp);
+        document.addEventListener('keydown', this.onKeyDown.bind(this));
+        document.addEventListener('keyup', this.onKeyUp.bind(this));
+        document.addEventListener('click', this.restart.bind(this));
     },
 
     /**
-     * 按键按下
+     * 键盘按键按下
      * @param {*} e 
      */
     onKeyDown: function (e) {
         if (Runner.keycodes.JUMP[e.keyCode]) {
-            if (!Trex.instance_.jumping) {
+            if (this.crashed) {
+                this.restart();
+            } else if (!Trex.instance_.jumping) {
                 Trex.instance_.startJump(6);
             }
         } else if (Runner.keycodes.DUCK[e.keyCode]) {
@@ -146,7 +149,7 @@ Runner.prototype = {
     },
 
     /**
-     * 按键松开
+     * 键盘按键松开
      * @param {*} e 
      */
     onKeyUp: function (e) {
@@ -154,6 +157,8 @@ Runner.prototype = {
             Trex.instance_.speedDrop = false;
         }
     },
+
+
 
     /**
      * 停止
@@ -197,15 +202,12 @@ Runner.prototype = {
             this.colcDistance(deltaTime);
             this.setSpeed();
 
-            console.log(this.currentSpeed);
 
             //游戏从开始到当前经历的帧的数量++
             this.gameFrame++;
 
             //清除画面
             ctx.clearRect(0, 0, 600, 150);
-
-
 
             //执行
             this.trex.update(deltaTime, this.trex.status);
@@ -263,7 +265,6 @@ Runner.prototype = {
      * 游戏结束
      */
     gameOver: function () {
-        console.log(this.raqId);
         window.cancelAnimationFrame(this.raqId);
         this.raqId = 0;
         this.crashed = true;
@@ -274,6 +275,25 @@ Runner.prototype = {
                 Runner.spriteDefinition.RESTART, this.dimensions);
         } else {
             this.gameOverPanel.draw();
+        }
+    },
+
+    /**
+     * 重新开始
+     */
+    restart: function () {
+        if (this.crashed) {
+            this.trex.reset();
+            Obstacle.obstacles = [];
+            this.horizon.reset();
+            this.night.reset();
+            this.crashed = false;
+            this.time = performance.now();
+            this.distance = 0;
+            this.currentSpeed = this.config.SPEED;
+            this.canvasCtx.clearRect(0, 0, 600, 150);
+            this.score.reset();
+            this.raqId = requestAnimationFrame(this.update.bind(this));
         }
     }
 }

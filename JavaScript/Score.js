@@ -122,7 +122,6 @@ DistanceMeter.prototype = {
     },
 
     update: function (deltaTime, distance) {
-        console.log(distance);
         let paint = true;
         let playSound = false;
 
