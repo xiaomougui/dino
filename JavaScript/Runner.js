@@ -24,6 +24,7 @@ function Runner(outerContainerId, opt_config) {
     this.activated = false; //是否开始游戏
     this.paused = false;
     this.crashed = false;
+    this.restartable = false;
 
     this.raqId = 0; //逐帧动画方法的id
 
@@ -32,6 +33,8 @@ function Runner(outerContainerId, opt_config) {
     this.distance = 0;  //当前走过的距离
 
     this.msPerFrame = 1000 / FPS;
+
+    this.time = 0;
 
     this.gameFrame = 0;
     this.init();
@@ -82,22 +85,13 @@ Runner.prototype = {
         this.createCanvas();
         this.loadImages();
 
-        //初始化为默认速度
-        this.currentSpeed = this.config.SPEED;
+        this.imgSprite.onload = function () {
+            this.setParams();
+            this.createObjects();
+            this.startListener();
+            this.play();
+        }.bind(this);
 
-        this.horizon = new HorizonLine(this.canvasEl, Runner.spriteDefinition.HORIZON);
-        this.cloud = new Cloud(this.canvasEl, Runner.spriteDefinition.CLOUD, DEFAULT_WIDTH);
-        this.night = new NightMode(this.canvasEl, Runner.spriteDefinition.MOON, DEFAULT_WIDTH);
-        this.obstacle = new Obstacle(this.canvasEl, Obstacle.types[0], Runner.spriteDefinition[Obstacle.types[0].type], { WIDTH: 600 }, 0.6, 1);
-        this.trex = new Trex(this.canvasEl, Runner.spriteDefinition.TREX);
-        this.score = new DistanceMeter(this.canvasEl, Runner.spriteDefinition.TEXT_SPRITE, DEFAULT_WIDTH);
-
-        this.activated = true;
-        this.paused = false;
-
-        this.startListener();
-
-        this.update();
     },
 
     /**
@@ -122,6 +116,34 @@ Runner.prototype = {
     },
 
     /**
+     * 创建对象
+     */
+    createObjects: function () {
+        this.horizon = new HorizonLine(this.canvasEl, Runner.spriteDefinition.HORIZON);
+        this.cloud = new Cloud(this.canvasEl, Runner.spriteDefinition.CLOUD, DEFAULT_WIDTH);
+        this.night = new NightMode(this.canvasEl, Runner.spriteDefinition.MOON, DEFAULT_WIDTH);
+        this.obstacle = new Obstacle(this.canvasEl, Obstacle.types[0], Runner.spriteDefinition[Obstacle.types[0].type], { WIDTH: 600 }, 0.6, 1);
+        this.trex = new Trex(this.canvasEl, Runner.spriteDefinition.TREX);
+        this.score = new DistanceMeter(this.canvasEl, Runner.spriteDefinition.TEXT_SPRITE, DEFAULT_WIDTH);
+    },
+
+    /**
+     * 设置参数
+     */
+    setParams: function () {
+        //初始化为默认速度
+        this.currentSpeed = this.config.SPEED;
+        //开始参数
+        this.activated = false;
+        this.paused = false;
+        this.crashed = false;
+        this.restartable = false;
+
+        this.distance = 0;
+        this.time = performance.now();
+    },
+
+    /**
      * 开始监听事件
      */
     startListener: function () {
@@ -136,7 +158,12 @@ Runner.prototype = {
      */
     onKeyDown: function (e) {
         if (Runner.keycodes.JUMP[e.keyCode]) {
-            if (this.crashed) {
+            if (!this.crashed && !this.activated) {
+                //游戏开始
+                this.activated = true;
+                //恐龙状态为奔跑
+                this.trex.update(0, Trex.status.RUNNING);
+            } else if (this.crashed && this.restartable) {
                 this.restart();
             } else if (!Trex.instance_.jumping) {
                 Trex.instance_.startJump(6);
@@ -157,8 +184,6 @@ Runner.prototype = {
             Trex.instance_.speedDrop = false;
         }
     },
-
-
 
     /**
      * 停止
@@ -199,10 +224,6 @@ Runner.prototype = {
             time = time || 0;
             deltaTime = time - this.startTime;
 
-            this.colcDistance(deltaTime);
-            this.setSpeed();
-
-
             //游戏从开始到当前经历的帧的数量++
             this.gameFrame++;
 
@@ -210,23 +231,32 @@ Runner.prototype = {
             ctx.clearRect(0, 0, 600, 150);
 
             //执行
+            console.log(this.trex.status);
             this.trex.update(deltaTime, this.trex.status);
-            this.score.update(deltaTime, this.distance);
-            this.horizon.update(deltaTime, this.currentSpeed);
-            this.cloud.updateClouds(0.2);
-            this.night.invert(deltaTime);
+            this.horizon.draw();
+            if (this.activated) {
+                this.colcDistance(deltaTime);
+                this.setSpeed();
 
-            //延迟出现障碍物
-            if (this.gameFrame > FPS) {
-                this.obstacle.updateObstacles(deltaTime, this.currentSpeed);
+                this.score.update(deltaTime, this.distance);
+                this.horizon.update(deltaTime, this.currentSpeed);
+                this.cloud.updateClouds(0.2);
+                this.night.invert(deltaTime);
+
+                //延迟出现障碍物
+                if (this.gameFrame > FPS) {
+                    this.obstacle.updateObstacles(deltaTime, this.currentSpeed);
+                }
+                //检测碰撞
+                this.isCrashed(Obstacle.obstacles[0], this.trex);
             }
 
 
-            //检测碰撞
-            this.isCrashed(Obstacle.obstacles[0], this.trex);
+
 
             this.startTime = time;
 
+            //TODO
             //默认会传递给调用函数（draw）一个时间戳，
             //代表requestAnimationFrame开始执行回调函数的时刻
             let aniId = window.requestAnimationFrame(this.update.bind(this));
@@ -251,13 +281,10 @@ Runner.prototype = {
      * 运行
      */
     play: function () {
-        if (!this.crashed) {
-            this.activated = true;
-            this.paused = false;
+        if (!this.crashed && !this.paused) {
 
-            window.onload = function () {
-                this.update();
-            }.bind(this);
+            this.update(this.time);
+
         }
     },
 
@@ -273,27 +300,28 @@ Runner.prototype = {
         if (!this.gameOverPanel) {
             this.gameOverPanel = new GameOverPanel(this.canvasEl, Runner.spriteDefinition.TEXT_SPRITE,
                 Runner.spriteDefinition.RESTART, this.dimensions);
-        } else {
-            this.gameOverPanel.draw();
         }
+
+        this.gameOverPanel.draw().then(value => {
+            this.restartable = value;
+        });
     },
 
     /**
      * 重新开始
      */
     restart: function () {
-        if (this.crashed) {
+        if (this.crashed && this.restartable) {
+            this.setParams();
             this.trex.reset();
             Obstacle.obstacles = [];
             this.horizon.reset();
             this.night.reset();
-            this.crashed = false;
-            this.time = performance.now();
-            this.distance = 0;
-            this.currentSpeed = this.config.SPEED;
-            this.canvasCtx.clearRect(0, 0, 600, 150);
             this.score.reset();
-            this.raqId = requestAnimationFrame(this.update.bind(this));
+            this.canvasCtx.clearRect(0, 0, 600, 150);
+            this.activated = true;
+            this.update(this.time);
+
         }
     }
 }
