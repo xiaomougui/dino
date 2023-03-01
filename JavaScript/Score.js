@@ -71,6 +71,8 @@ DistanceMeter.prototype = {
             maxDistanceStr += '9';
         }
 
+        this.audio = new Audio();
+
         //99999
         this.maxScore = parseInt(maxDistanceStr);
     },
@@ -125,6 +127,7 @@ DistanceMeter.prototype = {
         let paint = true;
         let playSound = false;
 
+
         if (!this.acheivement) {
             distance = this.getActualDistance(distance);
             //分数超过最大分数增至十万位
@@ -140,7 +143,7 @@ DistanceMeter.prototype = {
                     this.flashTimer = 0;
                     //TODO
                     playSound = true;
-                    Runner.instance_.playSound(Runner.audioevent.GOAL);
+                    Runner.instance_.playSound(Runner.instance_.audio[2], Runner.audioevent.GOAL);
                 }
 
                 //'00000'+999=00000999 =>00999

@@ -19,7 +19,7 @@ function Runner(outerContainerId, opt_config) {
     this.canvasEl = null;
     this.canvasCtx = null;
 
-    this.audio = null;
+    this.audio = [];
     this.imgSprite = null;
 
     this.assestsPath = "./assets";
@@ -123,7 +123,10 @@ Runner.prototype = {
     },
 
     loadAudios: function () {
-        this.audio = new Audio();
+        for (let i = 0; i < 3; i++) {
+            //TODO
+            this.audio[i] = new Audio();
+        }
     },
 
     /**
@@ -184,12 +187,12 @@ Runner.prototype = {
         if (Runner.keycodes.JUMP[e.keyCode]) {
             if (!this.crashed && !this.activated) {
                 this.activated = true;
-                this.playSound(Runner.audioevent.JUMP);
+                this.playSound(this.audio[0], Runner.audioevent.JUMP);
                 this.trex.update(0, Trex.status.RUNNING);
             } else if (this.crashed && this.restartable) {
                 this.restart();
             } else if (!Trex.instance_.jumping) {
-                this.playSound(Runner.audioevent.JUMP);
+                this.playSound(this.audio[0], Runner.audioevent.JUMP);
                 Trex.instance_.startJump(6);
             }
         } else if (Runner.keycodes.DUCK[e.keyCode]) {
@@ -306,10 +309,10 @@ Runner.prototype = {
         }
     },
 
-    playSound: function (event) {
+    playSound: function (audio, event) {
         this.isSoundPlay = true;
-        this.audio.src = `${this.assestsPath}/${this.audiofile[event]}`;
-        this.audio.play();
+        audio.src = `${this.assestsPath}/${this.audiofile[event]}`;
+        audio.play();
     },
 
     /**
@@ -321,7 +324,7 @@ Runner.prototype = {
         this.crashed = true;
         this.trex.update(0, Trex.status.CRASHED);
 
-        this.playSound(Runner.audioevent.FAIL);
+        this.playSound(this.audio[1], Runner.audioevent.FAIL);
 
         if (!this.gameOverPanel) {
             this.gameOverPanel = new GameOverPanel(this.canvasEl, Runner.spriteDefinition.TEXT_SPRITE,
