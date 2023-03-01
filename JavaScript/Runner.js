@@ -19,7 +19,12 @@ function Runner(outerContainerId, opt_config) {
     this.canvasEl = null;
     this.canvasCtx = null;
 
+    this.audio = null;
     this.imgSprite = null;
+
+    this.assestsPath = "./assets";
+    this.imgName = "all.png";
+    this.audiofile = Runner.audiofile;
 
     this.activated = false; //是否开始游戏
     this.paused = false;
@@ -31,6 +36,8 @@ function Runner(outerContainerId, opt_config) {
     this.currentSpeed = 0;  //当前速度
 
     this.distance = 0;  //当前走过的距离
+
+    this.isSoundPlay = false; //是否播放声音
 
     this.msPerFrame = 1000 / FPS;
 
@@ -63,6 +70,18 @@ Runner.spriteDefinition = {
     ALT_GAME_END: { x: 121, y: 2 }  //gameover
 }
 
+Runner.audiofile = {
+    FAIL: "fail.mp3",
+    GOAL: "goal.mp3",
+    JUMP: "jump.mp3",
+}
+
+Runner.audioevent = {
+    FAIL: "FAIL",
+    GOAL: "GOAL",
+    JUMP: "JUMP",
+}
+
 Runner.keycodes = {
     JUMP: { '38': 1, '32': 1 },  // Up, spacebar,↑和空格，跳跃
     DUCK: { '40': 1 },  // Down，↓，低头，躲避
@@ -84,6 +103,7 @@ Runner.prototype = {
     init: function () {
         this.createCanvas();
         this.loadImages();
+        this.loadAudios();
 
         this.imgSprite.onload = function () {
             this.setParams();
@@ -99,7 +119,11 @@ Runner.prototype = {
      */
     loadImages: function () {
         this.imgSprite = new Image();
-        this.imgSprite.src = './assets/all.png';
+        this.imgSprite.src = `${this.assestsPath}/${this.imgName}`;
+    },
+
+    loadAudios: function () {
+        this.audio = new Audio();
     },
 
     /**
@@ -159,13 +183,13 @@ Runner.prototype = {
     onKeyDown: function (e) {
         if (Runner.keycodes.JUMP[e.keyCode]) {
             if (!this.crashed && !this.activated) {
-                //游戏开始
                 this.activated = true;
-                //恐龙状态为奔跑
+                this.playSound(Runner.audioevent.JUMP);
                 this.trex.update(0, Trex.status.RUNNING);
             } else if (this.crashed && this.restartable) {
                 this.restart();
             } else if (!Trex.instance_.jumping) {
+                this.playSound(Runner.audioevent.JUMP);
                 Trex.instance_.startJump(6);
             }
         } else if (Runner.keycodes.DUCK[e.keyCode]) {
@@ -231,7 +255,6 @@ Runner.prototype = {
             ctx.clearRect(0, 0, 600, 150);
 
             //执行
-            console.log(this.trex.status);
             this.trex.update(deltaTime, this.trex.status);
             this.horizon.draw();
             if (this.activated) {
@@ -250,9 +273,6 @@ Runner.prototype = {
                 //检测碰撞
                 this.isCrashed(Obstacle.obstacles[0], this.trex);
             }
-
-
-
 
             this.startTime = time;
 
@@ -282,10 +302,14 @@ Runner.prototype = {
      */
     play: function () {
         if (!this.crashed && !this.paused) {
-
             this.update(this.time);
-
         }
+    },
+
+    playSound: function (event) {
+        this.isSoundPlay = true;
+        this.audio.src = `${this.assestsPath}/${this.audiofile[event]}`;
+        this.audio.play();
     },
 
     /**
@@ -296,6 +320,8 @@ Runner.prototype = {
         this.raqId = 0;
         this.crashed = true;
         this.trex.update(0, Trex.status.CRASHED);
+
+        this.playSound(Runner.audioevent.FAIL);
 
         if (!this.gameOverPanel) {
             this.gameOverPanel = new GameOverPanel(this.canvasEl, Runner.spriteDefinition.TEXT_SPRITE,
@@ -321,7 +347,6 @@ Runner.prototype = {
             this.canvasCtx.clearRect(0, 0, 600, 150);
             this.activated = true;
             this.update(this.time);
-
         }
     }
 }

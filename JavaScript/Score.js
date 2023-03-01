@@ -140,6 +140,7 @@ DistanceMeter.prototype = {
                     this.flashTimer = 0;
                     //TODO
                     playSound = true;
+                    Runner.instance_.playSound(Runner.audioevent.GOAL);
                 }
 
                 //'00000'+999=00000999 =>00999
