@@ -17,6 +17,7 @@ function DistanceMeter(canvas, spritePos, canvasWidth) {
     this.maxScore = 0;
     //高分榜
     this.highScore = 0;
+    this.highScoreArr = [];
 
     //是否进行闪动特效
     this.acheivement = false;
@@ -73,8 +74,25 @@ DistanceMeter.prototype = {
 
         this.audio = new Audio();
 
+        this.highScoreStart();
+
         //99999
         this.maxScore = parseInt(maxDistanceStr);
+    },
+
+    /**
+     * 获取高分
+     */
+    getHighScore() {
+        if (!window.localStorage) {
+            alert("浏览器不支持localstorage");
+        } else {
+            if (localStorage.getItem('highScore')) {
+                this.highScore = localStorage.getItem('highScore');
+            } else {
+                this.highScore = 0;
+            }
+        }
     },
 
     /**
@@ -101,10 +119,13 @@ DistanceMeter.prototype = {
 
         this.canvasCtx.save();
 
+        console.log(opt_highScore);
+
         if (opt_highScore) {
             // 将最高分放至当前分数的左边
             let highScoreX = this.x - (this.maxScoreUnits * 2) * DistanceMeter.dimensions.WIDTH;
             this.canvasCtx.translate(highScoreX, this.y);
+
         } else {
             this.canvasCtx.translate(this.x, this.y);
         }
@@ -126,7 +147,6 @@ DistanceMeter.prototype = {
     update: function (deltaTime, distance) {
         let paint = true;
         let playSound = false;
-
 
         if (!this.acheivement) {
             distance = this.getActualDistance(distance);
@@ -181,14 +201,23 @@ DistanceMeter.prototype = {
     },
 
     /**
+     * 开始关于高分的一系列操作
+     */
+    highScoreStart() {
+        this.getHighScore();
+        this.setHighScore();
+        this.drawHighScore();
+    },
+
+    /**
      * 绘制高分榜
      */
     drawHighScore: function () {
         this.canvasCtx.save();
         //颜色浅
         this.canvasCtx.globalAlpha = .8;
-        for (let i = this.highScore.length - 1; i >= 0; i--) {
-            this.draw(i, parseInt(this.highScore[i], 10), true);
+        for (let i = this.highScoreArr.length - 1; i >= 0; i--) {
+            this.draw(i, parseInt(this.highScoreArr[i], 10), true);
         }
         this.canvasCtx.restore();
     },
@@ -198,11 +227,14 @@ DistanceMeter.prototype = {
      * @param {Number} distance 
      */
     setHighScore: function (distance) {
-        let actuDistance = this.getActualDistance(distance);
-        if (actuDistance > this.highScore) {
-            let highScoreStr = (this.defaultString + actuDistance).substr(- this.maxScoreUnits);
+        let highScoreStr;
+        if (this.getActualDistance(distance) > this.highScore) {
+            this.highScore = this.getActualDistance(distance);
+            localStorage.setItem('highScore', this.highScore);
+        } else if (this.highScoreArr = []) {
+            highScoreStr = (this.defaultString + this.highScore).substr(- this.maxScoreUnits);
             //10和11分别对应雪碧图中的H、I
-            this.highScore = ['10', '11', ''].concat(highScoreStr.split(''));
+            this.highScoreArr = ['10', '11', ''].concat(highScoreStr.split(''));
         }
     },
 
@@ -210,6 +242,7 @@ DistanceMeter.prototype = {
      * 重置
      */
     reset: function () {
+        this.highScoreStart();
         this.update(0);
         this.acheivement = false;
     }

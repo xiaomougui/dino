@@ -325,7 +325,7 @@ Runner.prototype = {
         this.trex.update(0, Trex.status.CRASHED);
 
         this.playSound(this.audio[1], Runner.audioevent.FAIL);
-
+        this.score.setHighScore(this.distance);
         if (!this.gameOverPanel) {
             this.gameOverPanel = new GameOverPanel(this.canvasEl, Runner.spriteDefinition.TEXT_SPRITE,
                 Runner.spriteDefinition.RESTART, this.dimensions);
