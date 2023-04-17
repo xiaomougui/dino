@@ -72,7 +72,7 @@ HorizonLine.prototype = {
         }
     },
     update: function (deltaTime, speed) {
-        let increment = Math.floor(speed * (FPS / 1000) * deltaTime);
+        let increment = Math.floor((speed * FPS / 1000) * deltaTime * 100) / 100;
         console.log(increment);
         if (this.xPos[0] <= 0) {//交换地面一二
             this.updateXPos(0, increment);

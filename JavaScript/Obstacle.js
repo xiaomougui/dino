@@ -156,7 +156,7 @@ Obstacle.prototype = {
                 speed += this.speedOffset;
             }
             //更新x坐标
-            this.xPos -= Math.floor((speed * FPS / 1000) * deltaTime);
+            this.xPos -= Math.floor((speed * FPS / 1000) * deltaTime * 100) / 100;
             //翼龙动画帧更新
             if (this.typeConfig.numFrames) {
                 this.timer += deltaTime;

@@ -96,7 +96,7 @@ Runner.config = {
     INVERT_DISTANCE: 700,   //倒置距离
     MAX_SPEED: 13,  //最大速度
     MOBILE_SPEED_COEFFICIENT: 1.2,  //手机(安卓)系数
-    SPEED: 6    //速度
+    SPEED: 5    //速度
 }
 
 Runner.prototype = {
@@ -287,7 +287,6 @@ Runner.prototype = {
                 //检测碰撞
                 this.isCrashed(Obstacle.obstacles[0], this.trex);
             }
-            console.log(this.startTime, deltaTime, time, this.distance);
 
             this.startTime = time;
 
