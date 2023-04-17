@@ -160,14 +160,15 @@ Runner.prototype = {
     setParams: function () {
         //初始化为默认速度
         this.currentSpeed = this.config.SPEED;
-        //开始参数
+        //开始参数 
         this.activated = false;
         this.paused = false;
         this.crashed = false;
         this.restartable = false;
 
         this.distance = 0;
-        this.time = performance.now();
+        this.startTime = 0;
+        // this.time = performance.now();
     },
 
     /**
@@ -234,7 +235,7 @@ Runner.prototype = {
      * 设置速度
      */
     setSpeed: function () {
-        if (this.currentSpeed < this.config.MAX_SPEED) {
+        if (this.currentSpeed < this.config.MAX_SPEED && this.trex.status === "RUNNING") {
             this.currentSpeed += this.config.ACCELERATION;
         }
     },
@@ -244,12 +245,21 @@ Runner.prototype = {
      */
     update: function (time) {
         if (!this.crashed) {
-            this.startTime = this.startTime || 0;
+            this.startTime = this.startTime || performance.now();
             let deltaTime = 0;
             let ctx = this.canvasCtx;
 
-            time = time || 0;
+
+
+            time = time || performance.now();
             deltaTime = time - this.startTime;
+
+            //修复地面丢帧问题
+            //由于update调用requestAnimationFrame时间与程序代码时间有一定时间差
+            //time表示requestAnimationFrame函数运行到当前时间的毫秒数
+            //performance.now()表示整体代码到当前时间的毫秒数
+            //所以deltaTime有可能为负数
+            deltaTime = deltaTime > 0 ? deltaTime : 0;
 
             //游戏从开始到当前经历的帧的数量++
             this.gameFrame++;
@@ -265,6 +275,7 @@ Runner.prototype = {
                 this.setSpeed();
 
                 this.score.update(deltaTime, this.distance);
+                console.log(this.currentSpeed);
                 this.horizon.update(deltaTime, this.currentSpeed);
                 this.cloud.updateClouds(0.2);
                 this.night.invert(deltaTime);
@@ -276,8 +287,11 @@ Runner.prototype = {
                 //检测碰撞
                 this.isCrashed(Obstacle.obstacles[0], this.trex);
             }
+            console.log(this.startTime, deltaTime, time, this.distance);
 
             this.startTime = time;
+
+
 
             //TODO
             //默认会传递给调用函数（draw）一个时间戳，

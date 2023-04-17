@@ -119,8 +119,6 @@ DistanceMeter.prototype = {
 
         this.canvasCtx.save();
 
-        console.log(opt_highScore);
-
         if (opt_highScore) {
             // 将最高分放至当前分数的左边
             let highScoreX = this.x - (this.maxScoreUnits * 2) * DistanceMeter.dimensions.WIDTH;
