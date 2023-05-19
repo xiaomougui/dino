@@ -19,14 +19,22 @@ function Cloud(canvas, spritePos, containWidth) {
 }
 
 Cloud.config = {
-    HEIGHT: 14,  //云朵sprite的高度
-    MAX_CLOUD_GAP: 400,  //两朵云之间的最大间隙
-    MAX_SKY_LEVEL: 30,   //云朵的最大高度
-    MIN_CLOUD_GAP: 100,  //两朵云之间的最小间隙
-    MIN_SKY_LEVEL: 71,   //云朵的最小高度
-    WIDTH: 46,    //云朵sprite的宽度
-    MAX_CLOUDS: 6,//最大云朵数量
-    CLOUD_FREQUENCY: .5 //云朵出现频率
+    //云朵sprite的高度
+    HEIGHT: 14,
+    //两朵云之间的最大间隙
+    MAX_CLOUD_GAP: 400,
+    //云朵的最大高度
+    MAX_SKY_LEVEL: 30,
+    //两朵云之间的最小间隙
+    MIN_CLOUD_GAP: 100,
+    //云朵的最小高度
+    MIN_SKY_LEVEL: 71,
+    //云朵sprite的宽度
+    WIDTH: 46,
+    //最大云朵数量
+    MAX_CLOUDS: 6,
+    //云朵出现频率
+    CLOUD_FREQUENCY: .5
 }
 
 //存储云朵
@@ -51,7 +59,10 @@ Cloud.prototype = {
 
         this.ctx.restore();
     },
-    //添加云朵并控制其移动
+    /**
+     * 添加云朵并控制其移动
+     * @param {Number} speed 云朵移动的速度参数
+     */
     updateClouds: function (speed) {
         let numClouds = Cloud.clouds.length;
         //如果云朵存在
@@ -92,11 +103,16 @@ Cloud.prototype = {
             }
         }
     },
-    //判断云朵是否移出屏幕外
+    /**
+     * 判断云朵是否移出屏幕外
+     * @returns 
+     */
     isVisible: function () {
         return this.xPos < 0;
     },
-    //将云朵添加至数组
+    /**
+     * 将云朵添加至数组
+     */
     addCloud: function () {
         let cloud = new Cloud(this.canvas, this.spritePos, DEFAULT_WIDTH);
         Cloud.clouds.push(cloud);

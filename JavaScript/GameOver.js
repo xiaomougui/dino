@@ -8,7 +8,7 @@ GameOverPanel.dimensions = {
 };
 
 /**
- * 
+ * GameOver
  * @param {*} canvas 
  * @param {*} textImgPos 
  * @param {*} restartImgPos 

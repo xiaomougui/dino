@@ -11,41 +11,65 @@ function Trex(canvas, spritePos) {
     }
     this.canvas = canvas;
     this.ctx = canvas.getContext('2d');
-    this.spritePos = spritePos; //精灵图坐标
-    this.xPos = 0;  //在画布中x的坐标
-    this.yPos = 0;  //在画布中y的坐标
-    this.groundYPos = 0;    //初始化地面的高度
-    this.currentFrame = 0;  //初始化动画帧
-    this.currentAnimFrames = [];  //记录当前状态的动画帧
-    this.blinkDelay = 0;    //眨眼延迟(随机)
-    this.animStartTime = 0; //动画开始的时间
-    this.timer = 0; //计时器
-    this.msPerFrame = 1000 / FPS;   //默认帧率
-    this.config = Trex.config;  //拷贝一个配置的副本方法方便以后使用
+    //精灵图坐标
+    this.spritePos = spritePos;
+    //在画布中x的坐标
+    this.xPos = 0;
+    //在画布中y的坐标
+    this.yPos = 0;
+    //初始化地面的高度
+    this.groundYPos = 0;
+    //初始化动画帧
+    this.currentFrame = 0;
+    //记录当前状态的动画帧
+    this.currentAnimFrames = [];
+    //眨眼延迟(随机)
+    this.blinkDelay = 0;
+    //动画开始的时间
+    this.animStartTime = 0;
+    //计时器
+    this.timer = 0;
+    //默认帧率
+    this.msPerFrame = 1000 / FPS;
+    //拷贝一个配置的副本方法方便以后使用
+    this.config = Trex.config;
     this.normalJumpConfig = Trex.normalJumpConfig;
-    this.jumpVelocity = 0;  //跳跃的初始速度
+    //跳跃的初始速度
+    this.jumpVelocity = 0;
 
-    this.status = '';  //初始化默认状态为待机状态
+    //初始化默认状态为待机状态
+    this.status = '';
 
     //为各种状态建立标识
-    this.jumping = false;   //是否处于跳跃
-    this.ducking = false;   //是否处于闪避
-    this.reachedMinHeight = false;  //是否到达最小跳跃高度
-    this.speedDrop = false; //是否加速降落
-    this.jumpCount = 0; //跳跃次数
+    //是否处于跳跃
+    this.jumping = false;
+    //是否处于闪避
+    this.ducking = false;
+    //是否到达最小跳跃高度
+    this.reachedMinHeight = false;
+    //是否加速降落
+    this.speedDrop = false;
+    //跳跃次数 
+    this.jumpCount = 0;
 
 
     this.init();
 }
 
 Trex.config = {
-    DROP_VELOCITY: -5, //下降速度
-    BLINK_TIMING: 6000,  //眨眼间隔
-    WIDTH: 44,        //站立时宽度
-    WIDTH_DUCK: 59,    //闪避时宽度
-    HEIGHT: 47,    //站立时高度
+    //下降速度
+    DROP_VELOCITY: -5,
+    //眨眼间隔
+    BLINK_TIMING: 6000,
+    //站立时宽度
+    WIDTH: 44,
+    //闪避时宽度
+    WIDTH_DUCK: 59,
+    //站立时高度  
+    HEIGHT: 47,
     BOTTOM_PAD: 10,
-    MIN_JUMP_HEIGHT: 30 //最小起跳高度
+    //最小起跳高度
+    MIN_JUMP_HEIGHT: 30
 };
 
 //缓慢模式跳跃设置
@@ -66,18 +90,26 @@ Trex.normalJumpConfig = {
 
 //状态
 Trex.status = {
-    CRASHED: 'CRASHED', //与障碍物发生碰撞
-    DUCKING: 'DUCKING', //闪避
-    JUMPING: 'JUMPING', //跳跃
-    RUNNING: 'RUNNING', //跑动
-    WAITING: 'WAITING', //待机
+    //与障碍物发生碰撞
+    CRASHED: 'CRASHED',
+    //闪避
+    DUCKING: 'DUCKING',
+    //跳跃
+    JUMPING: 'JUMPING',
+    //跑动
+    RUNNING: 'RUNNING',
+    //待机
+    WAITING: 'WAITING',
 }
 
 //元数据(metadata)，记录各个状态的动画帧和帧率
 Trex.animFrames = {
-    WAITING: {//待机状态
-        frames: [44, 0],//动画帧x坐标在44和0之间切换，由于在雪碧图中的y坐标是0所以不用记录
-        msPerFrame: 1000 / 3    //一秒3帧
+    //待机状态
+    WAITING: {
+        //动画帧x坐标在44和0之间切换，由于在雪碧图中的y坐标是0所以不用记录
+        frames: [44, 0],
+        //一秒3帧
+        msPerFrame: 1000 / 3
     },
     RUNNING: {
         frames: [88, 132],
@@ -177,6 +209,8 @@ Trex.prototype = {
             this.currentFrame = this.currentFrame === this.currentAnimFrames.length - 1 ? 0 : this.currentFrame + 1;
             this.timer = 0;
         }
+
+        console.log(this.status);
 
         //待机状态
         if (this.status === Trex.status.WAITING) {

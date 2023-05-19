@@ -48,13 +48,19 @@ Obstacle.MAX_OBSTACLE_DUPLICATION = 2;
 
 Obstacle.types = [
     {
-        type: 'CACTUS_SMALL', //小仙人掌
-        width: 17,  //宽
-        height: 35, //高
-        yPos: 105,  //在画布上的y坐标
+        //小仙人掌
+        type: 'CACTUS_SMALL',
+        //宽
+        width: 17,
+        //高
+        height: 35,
+        //在画布上的y坐标
+        yPos: 105,
         multipleSpeed: 4,
-        minGap: 120,    //最小间距
-        minSpeed: 0,    //最低速度
+        //最小间距
+        minGap: 120,
+        //最低速度
+        minSpeed: 0,
         collisionBoxes: [new CollisionBox(0, 7, 5, 27), new CollisionBox(4, 0, 6, 34), new CollisionBox(10, 4, 7, 14)] //碰撞盒子
     },
     {
@@ -68,22 +74,31 @@ Obstacle.types = [
         collisionBoxes: [new CollisionBox(0, 12, 7, 38), new CollisionBox(8, 0, 7, 49), new CollisionBox(13, 10, 10, 38)]
     },
     {
-        type: 'PTERODACTYL',    //翼龙
+        //翼龙
+        type: 'PTERODACTYL',
         width: 46,
         height: 40,
-        yPos: [100, 75, 50], //有高、中、低三种高度
+        //有高、中、低三种高度
+        yPos: [100, 75, 50],
         multipleSpeed: 999,
         minSpeed: 8.5,
         minGap: 150,
         collisionBoxes: [new CollisionBox(15, 15, 16, 5), new CollisionBox(18, 21, 24, 6), new CollisionBox(2, 14, 4, 3), new CollisionBox(6, 10, 4, 7), new CollisionBox(10, 8, 6, 9)],
-        numFrames: 2,   //有两个动画帧
-        frameRate: 1000 / 6,  //动画帧的切换速率，这里为一秒6帧
-        speedOffset: .8 //速度修正
+        //有两个动画帧
+        numFrames: 2,
+        //动画帧的切换速率，这里为一秒6帧
+        frameRate: 1000 / 6,
+        //速度修正
+        speedOffset: .8
 
     }
 ];
 
 Obstacle.prototype = {
+    /**
+     * 初始化
+     * @param {Number} speed 速度参数 
+     */
     init: function (speed) {
         //如果随机障碍物是翼龙，则只出现一只
         //翼龙的multipleSpeed是999，远大于speed
@@ -115,16 +130,25 @@ Obstacle.prototype = {
         //障碍物之间的间隙，与游戏速度有关
         this.gap = this.getGap(this.gapCoeffcient, speed);
     },
-    //障碍物之间的间隙，gapCoefficient为间隔系数
+    /**
+     * 障碍物之间的间隙
+     * @param {Number} gapCoeffcient 间隙系数 
+     * @param {Number} speed 速度参数
+     * @returns 
+     */
     getGap: function (gapCoeffcient, speed) {
         let minGap = Math.round(this.width * speed + this.typeConfig.minGap * gapCoeffcient);
         let maxGap = Math.round(minGap * Obstacle.MAX_GAP_COEFFICIENT);
         return getRandomNum(minGap, maxGap);
     },
-    //判断障碍物是否移除屏幕外
+    /**
+     * 判断障碍物是否移除屏幕外
+     * @returns 
+     */
     isVisible: function () {
         return this.xPos + this.width > 0;
     },
+
     draw: function () {
         //障碍物宽高
         let sourceWidth = this.typeConfig.width;
@@ -147,7 +171,12 @@ Obstacle.prototype = {
             this.xPos, this.yPos,
             sourceWidth * this.size, sourceHeight);
     },
-    //单个障碍物的移动
+
+    /**
+     * 更新障碍物
+     * @param {Number} deltaTime 从游戏开始到当前的时间 
+     * @param {Number} speed 速度参数 
+     */
     update: function (deltaTime, speed) {
         //如果障碍物没有移出屏幕外
         if (!this.remove) {
@@ -174,7 +203,11 @@ Obstacle.prototype = {
             }
         }
     },
-    //管理多个障碍物移动
+    /**
+     * 管理障碍物的移动
+     * @param {Number} deltaTime 从游戏开始到当前的时间 
+     * @param {Number} currentSpeed 当前速度 
+     */
     updateObstacles: function (deltaTime, currentSpeed) {
         //保存有一个障碍物列表的副本
         let updateObstacles = Obstacle.obstacles.slice(0);
@@ -203,7 +236,11 @@ Obstacle.prototype = {
             this.addNewObstacle(currentSpeed);
         }
     },
-    //随机添加障碍
+
+    /**
+     * 随机添加障碍物
+     * @param {Number} currentSpeed 当前速度
+     */
     addNewObstacle: function (currentSpeed) {
         //随机选取一种类型的障碍
         let obstacleTypeIndex = getRandomNum(0, Obstacle.types.length - 1);
@@ -229,7 +266,12 @@ Obstacle.prototype = {
             Obstacle.obstacleHistory.splice(Obstacle.MAX_OBSTACLE_DUPLICATION);
         }
     },
-    //检查障碍物是否超过允许的最大重复数
+
+    /**
+     * 检查障碍物是否超过允许的最大重复数
+     * @param {String} nextObstacleType 下一个障碍物的类型
+     * @returns 
+     */
     duplicateObstacleCheck: function (nextObstacleType) {
         let duplicateCount = 0;
         //与history数组中的障碍物类型比较，最大只允许重复两次

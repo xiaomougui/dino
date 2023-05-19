@@ -26,18 +26,23 @@ function Runner(outerContainerId, opt_config) {
     this.imgName = "all.png";
     this.audiofile = Runner.audiofile;
 
-    this.activated = false; //是否开始游戏
+    //是否开始游戏
+    this.activated = false;
     this.paused = false;
     this.crashed = false;
     this.restartable = false;
 
-    this.raqId = 0; //逐帧动画方法的id
+    //逐帧动画方法的id
+    this.raqId = 0;
 
-    this.currentSpeed = 0;  //当前速度
+    //当前速度
+    this.currentSpeed = 0;
 
-    this.distance = 0;  //当前走过的距离
+    //当前走过的距离
+    this.distance = 0;
 
-    this.isSoundPlay = false; //是否播放声音
+    //是否播放声音
+    this.isSoundPlay = false;
 
     this.msPerFrame = 1000 / FPS;
 
@@ -53,21 +58,36 @@ Runner.defaultDimensions = {
 }
 
 Runner.spriteDefinition = {
-    BACKGROUND_EL: { x: 86, y: 2 }, //背景
-    CACTUS_LARGE: { x: 332, y: 2 }, //大仙人掌
-    CACTUS_SMALL: { x: 228, y: 2 }, //小仙人掌
-    OBSTACLE_2: { x: 332, y: 2 },   //障碍2
-    OBSTACLE: { x: 228, y: 2 }, //障碍1
-    CLOUD: { x: 86, y: 2 }, //云
-    HORIZON: { x: 2, y: 54 },   //地面
-    MOON: { x: 484, y: 2 }, //月亮
-    PTERODACTYL: { x: 134, y: 2 },  //翼手龙
-    RESTART: { x: 2, y: 68 },   //重新开始
-    TEXT_SPRITE: { x: 655, y: 2 },  //正文
-    TREX: { x: 848, y: 2 }, //小恐龙
-    STAR: { x: 645, y: 2 }, //星星
-    COLLECTABLE: { x: 2, y: 2 },    //收集物
-    ALT_GAME_END: { x: 121, y: 2 }  //gameover
+    //背景
+    BACKGROUND_EL: { x: 86, y: 2 },
+    //大仙人掌
+    CACTUS_LARGE: { x: 332, y: 2 },
+    //小仙人掌
+    CACTUS_SMALL: { x: 228, y: 2 },
+    //障碍2
+    OBSTACLE_2: { x: 332, y: 2 },
+    //障碍1
+    OBSTACLE: { x: 228, y: 2 },
+    //云
+    CLOUD: { x: 86, y: 2 },
+    //地面
+    HORIZON: { x: 2, y: 54 },
+    //月亮  
+    MOON: { x: 484, y: 2 },
+    //翼手龙
+    PTERODACTYL: { x: 134, y: 2 },
+    //重新开始
+    RESTART: { x: 2, y: 68 },
+    //正文
+    TEXT_SPRITE: { x: 655, y: 2 },
+    //小恐龙 
+    TREX: { x: 848, y: 2 },
+    //星星
+    STAR: { x: 645, y: 2 },
+    //收集物
+    COLLECTABLE: { x: 2, y: 2 },
+    //GameOver
+    ALT_GAME_END: { x: 121, y: 2 }
 }
 
 Runner.audiofile = {
@@ -83,20 +103,29 @@ Runner.audioevent = {
 }
 
 Runner.keycodes = {
-    JUMP: { '38': 1, '32': 1 },  // Up, spacebar,↑和空格，跳跃
-    DUCK: { '40': 1 },  // Down，↓，低头，躲避
-    RESTART: { '13': 1 }  // Enter，重新开始
+    // Up, spacebar,↑和空格，跳跃
+    JUMP: { '38': 1, '32': 1 },
+    // Down，↓，低头，躲避
+    DUCK: { '40': 1 },
+    // Enter，重新开始
+    RESTART: { '13': 1 }
 }
 
 Runner.config = {
-    ACCELERATION: 0.001,    //加速
+    //加速
+    ACCELERATION: 0.001,
     AUDIOCUE_PROXIMITY_THRESHOLD: 190,
     AUDIOCUE_PROXIMITY_THRESHOLD_MOBILE_A11Y: 250,
-    GAP_COEFFICIENT: 0.6,   //缺口系数
-    INVERT_DISTANCE: 700,   //倒置距离
-    MAX_SPEED: 13,  //最大速度
-    MOBILE_SPEED_COEFFICIENT: 1.2,  //手机(安卓)系数
-    SPEED: 5    //速度
+    //缺口系数
+    GAP_COEFFICIENT: 0.6,
+    //倒置距离
+    INVERT_DISTANCE: 700,
+    //最大速度
+    MAX_SPEED: 13,
+    //手机(安卓)系数
+    MOBILE_SPEED_COEFFICIENT: 1.2,
+    //速度
+    SPEED: 5
 }
 
 Runner.prototype = {
@@ -197,8 +226,10 @@ Runner.prototype = {
                 Trex.instance_.startJump(6);
             }
         } else if (Runner.keycodes.DUCK[e.keyCode]) {
-            if (!Trex.instance_.jumping) {
+            if (Trex.instance_.jumping) {
                 Trex.instance_.setSpeedDrop();    //加速下降
+            } else {
+                this
             }
         }
     },
@@ -242,6 +273,7 @@ Runner.prototype = {
 
     /**
      * 更新页面
+     * @param {Number} time 当前时间 
      */
     update: function (time) {
         if (!this.crashed) {
@@ -322,6 +354,11 @@ Runner.prototype = {
         }
     },
 
+    /**
+     * 播放声音
+     * @param {HTMLAudioElement} audio 音频元素
+     * @param {String} event 播放音乐的事件 
+     */
     playSound: function (audio, event) {
         this.isSoundPlay = true;
         audio.src = `${this.assestsPath}/${this.audiofile[event]}`;

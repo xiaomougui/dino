@@ -9,24 +9,36 @@ function NightMode(canvas, spritePos, containWidth) {
     this.ctx = canvas.getContext('2d');
     this.spritePos = spritePos;
     this.containWidth = containWidth;
-    this.xPos = containWidth - 50;  //月亮的x坐标，一开始在画布右侧
+    //月亮的x坐标，一开始在画布右侧
+    this.xPos = containWidth - 50;
     this.yPos = 30;
     this.currentPhase = 0;
     this.opacity = 0;
-    this.stars = [];    //用来存储星星
-    this.drawStars = false; //是否描绘星星
-    this.placeStars();  //放置星星
+    //用来存储星星
+    this.stars = [];
+    //用来存储星星   
+    this.drawStars = false;
+    //放置星星
+    this.placeStars();
 }
 
 NightMode.config = {
-    FADE_SPEED: 0.035,    //淡入淡出速度
-    HEIGHT: 40,    //月亮高度
-    MOON_SPEED: 0.25,    //月亮移动速度
-    NUM_STARS: 2,    //星星数量
-    STAR_SIZE: 9,    //星星宽度
-    STAR_SPEED: 0.3,//星星速度
-    STAR_MAX_Y: 70,    //星星在画布上出现的位置
-    WIDTH: 20    //半个月度宽度
+    //淡入淡出速度
+    FADE_SPEED: 0.035,
+    //月亮高度
+    HEIGHT: 40,
+    //月亮移动速度
+    MOON_SPEED: 0.25,
+    //星星数量   
+    NUM_STARS: 2,
+    //星星宽度
+    STAR_SIZE: 9,
+    //星星速度 
+    STAR_SPEED: 0.3,
+    //星星在画布上出现的位置
+    STAR_MAX_Y: 70,
+    //半个月度宽度
+    WIDTH: 20
 };
 
 //月亮在不同时期有不同的位置
@@ -42,6 +54,10 @@ NightMode.invertTrigger = false;
 NightMode.INVERT_FADE_DUARTION = 5000;
 
 NightMode.prototype = {
+    /**
+     * 更新
+     * @param {Boolean} activated 游戏是否开始
+     */
     update: function (activated) {
         //当夜晚模式处于激活状态且opacity为0时
         //对月亮状态进行更新
@@ -76,6 +92,13 @@ NightMode.prototype = {
         }
         this.drawStars = true;
     },
+
+    /**
+     * 更新x轴坐标
+     * @param {Number} currentPos 当前位置
+     * @param {Number} speed 速度参数
+     * @returns 
+     */
     updateXPos: function (currentPos, speed) {
         if (currentPos < NightMode.config.WIDTH) {
             currentPos = this.containWidth;
@@ -84,6 +107,7 @@ NightMode.prototype = {
         }
         return currentPos;
     },
+
     draw: function () {
         //周期为3时画满月
         let moonSourceWidth = this.currentPhase == 3 ? NightMode.config.WIDTH * 2 : NightMode.config.WIDTH;
@@ -119,6 +143,10 @@ NightMode.prototype = {
         this.ctx.globalAlpha = 1;
         this.ctx.restore();
     },
+
+    /**
+     * 放置星星
+     */
     placeStars: function () {
         //将画布分为若干组
         let segmentSize = Math.round(this.containWidth / NightMode.config.NUM_STARS);
@@ -131,6 +159,11 @@ NightMode.prototype = {
             this.stars[i].sourceY = Runner.spriteDefinition.STAR.y + NightMode.config.STAR_SIZE * i;
         }
     },
+
+    /**
+     * 白天与黑夜的切换
+     * @param {Numbre} deltaTime 当前时间 
+     */
     invert: function (deltaTime) {
         this.update(NightMode.inverted);
 
@@ -155,6 +188,7 @@ NightMode.prototype = {
             }
         }
     },
+
     reset: function () {
         this.currentPhase = 0;
         this.opacity = 0;

@@ -36,9 +36,12 @@ function DistanceMeter(canvas, spritePos, canvasWidth) {
 }
 
 DistanceMeter.dimensions = {
-    WIDTH: 10,    //每个字符的宽度
-    HEIGHT: 13,    //每个字符的高
-    DEST_WIDTH: 11 //间隙
+    //每个字符的宽度
+    WIDTH: 10,
+    //每个字符的高 
+    HEIGHT: 13,
+    //间隙 
+    DEST_WIDTH: 11
 };
 
 DistanceMeter.config = {
@@ -142,6 +145,12 @@ DistanceMeter.prototype = {
         return distance ? Math.round(distance * this.config.COEFFICIENT) : 0;
     },
 
+    /**
+     * 更新
+     * @param {Number} deltaTime 持续时间
+     * @param {Number} distance 虚拟距离
+     * @returns 
+     */
     update: function (deltaTime, distance) {
         let paint = true;
         let playSound = false;
