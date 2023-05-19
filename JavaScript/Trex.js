@@ -212,12 +212,17 @@ Trex.prototype = {
 
         console.log(this.status);
 
+        this.ducking = false;
+
         //待机状态
         if (this.status === Trex.status.WAITING) {
             //执行眨眼动作
             this.blink(getTimeStamp());
         } else if (this.status === Trex.status.JUMPING) {
             this.updateJump(deltaTime);
+            this.draw(this.currentAnimFrames[this.currentFrame], 0);
+        } else if (this.status === Trex.status.DUCKING) {
+            this.ducking = true;
             this.draw(this.currentAnimFrames[this.currentFrame], 0);
         } else {
             this.draw(this.currentAnimFrames[this.currentFrame], 0);
@@ -323,6 +328,8 @@ Trex.prototype = {
         let sourceY = y;
         let sourceWidth = this.ducking && this.status != Trex.status.CRASHED
             ? this.config.WIDTH_DUCK : this.config.WIDTH;
+
+        console.log(sourceWidth);
 
         let sourceHeight = this.config.HEIGHT;
         sourceX += this.spritePos.x;

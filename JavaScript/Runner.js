@@ -216,20 +216,25 @@ Runner.prototype = {
     onKeyDown: function (e) {
         if (Runner.keycodes.JUMP[e.keyCode]) {
             if (!this.crashed && !this.activated) {
+                //开始
                 this.activated = true;
                 this.playSound(this.audio[0], Runner.audioevent.JUMP);
                 this.trex.update(0, Trex.status.RUNNING);
             } else if (this.crashed && this.restartable) {
+                //重新开始
                 this.restart();
             } else if (!Trex.instance_.jumping) {
+                //开始跳跃
                 this.playSound(this.audio[0], Runner.audioevent.JUMP);
                 Trex.instance_.startJump(6);
             }
         } else if (Runner.keycodes.DUCK[e.keyCode]) {
             if (Trex.instance_.jumping) {
-                Trex.instance_.setSpeedDrop();    //加速下降
+                //加速下降
+                Trex.instance_.setSpeedDrop();
             } else {
-                this
+                //切换为闪避态
+                this.trex.update(0, Trex.status.DUCKING);
             }
         }
     },
@@ -240,7 +245,13 @@ Runner.prototype = {
      */
     onKeyUp: function (e) {
         if (Runner.keycodes.DUCK[e.keyCode]) {
-            Trex.instance_.speedDrop = false;
+            if (Runner.keycodes.JUMP[e.keyCode]) {
+                Trex.instance_.speedDrop = false;
+            } else {
+                //按键松开后由闪避态恢复为奔跑态
+                this.trex.update(0, Trex.status.RUNNING);
+            }
+
         }
     },
 
