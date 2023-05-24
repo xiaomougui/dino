@@ -329,7 +329,8 @@ Trex.prototype = {
         let sourceWidth = this.ducking && this.status != Trex.status.CRASHED
             ? this.config.WIDTH_DUCK : this.config.WIDTH;
 
-        console.log(sourceWidth);
+        let drawWidth = this.ducking && this.status != Trex.status.CRASHED
+            ? this.config.WIDTH_DUCK : this.config.WIDTH;
 
         let sourceHeight = this.config.HEIGHT;
         sourceX += this.spritePos.x;
@@ -339,6 +340,6 @@ Trex.prototype = {
             sourceX, sourceY,
             sourceWidth, sourceHeight,
             this.xPos, this.yPos,
-            this.config.WIDTH, this.config.HEIGHT);
+            drawWidth, this.config.HEIGHT);
     }
 }
